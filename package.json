@@ -1,0 +1,18 @@
+{
+  "name": "epub-reader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Mansi Shah",
+    "email": "shah.mansi246@gmail.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "jsdom": "^11.5.1"
+  }
+}
