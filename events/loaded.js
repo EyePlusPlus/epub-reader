@@ -7,12 +7,16 @@ const screen = blessed.screen({
 const getContent = (value) => {
 	const contentBox = blessed.box({
 		content: `This is ${value}`,
+		keys: true,
 		tags: true,
 		border: {
 			type: 'line'
 		},
 		scrollable: true,
 		alwaysScroll: true,
+		scrollbar: {
+			bg: 'blue',
+		},
 		style: {
 			fg: 'white',
 			border: {
