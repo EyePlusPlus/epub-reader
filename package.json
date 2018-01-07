@@ -14,6 +14,7 @@
   "license": "MIT",
   "dependencies": {
     "blessed": "^0.1.81",
+    "epub": "^0.2.0",
     "jsdom": "^11.5.1"
   }
 }
