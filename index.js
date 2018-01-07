@@ -1,5 +1,10 @@
 const { JSDOM } = require('jsdom');
+const blessed = require('blessed');
 
+const screen = blessed.screen({
+	smartCSR: true
+});
+screen.title = 'my window title';
 const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,3 +20,4 @@ const html = `<!DOCTYPE html>
 
 const dom = new JSDOM(html);
 console.log(typeof dom);
+screen.render();

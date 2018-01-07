@@ -13,6 +13,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "blessed": "^0.1.81",
     "jsdom": "^11.5.1"
   }
 }
