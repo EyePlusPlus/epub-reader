@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const blessed = require('blessed');
 const { JSDOM } = require('jsdom');
+const h2p = require('html2plaintext');
 const screen = blessed.screen({
 	smartCSR: true
 });
@@ -57,7 +58,7 @@ module.exports = function onLoaded ({epub, _parserCtx}) {
 
 	list.on('select', (data, idx) => {
 
-		const newContent = getContent(_parserCtx.extractText(navList[data.content]));
+		const newContent = getContent(h2p(_parserCtx.extractText(navList[data.content])));
 
 		screen.remove(list);
 		screen.append(newContent);
