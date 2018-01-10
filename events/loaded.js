@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const blessed = require('blessed');
 const { JSDOM } = require('jsdom');
 const screen = blessed.screen({
@@ -31,14 +32,15 @@ const getContent = (value) => {
 };
 
 
-module.exports = function onLoaded ({epub}) {
-	// epub is now usable
-	screen.title = epub.metadata.title;
-	const tocList = [];
+module.exports = function onLoaded ({epub, _parserCtx}) {
+	const title = _.get(epub, ['raw', 'json', 'ncx', 'docTitle', '0', 'text']);
+	const navList = _.reduce(_.get(epub, ['raw', 'json', 'ncx', 'navMap', '0', 'navPoint']), (n, tree, idx) => {
+		n[_.get(tree, ['navLabel', '0', 'text', '0'])] = _.get(tree, ['content', '0', '$', 'src']);
+		return n;
+	}, {});
+	screen.title = title;
 
-	epub.flow.forEach(function(chapter){
-		tocList.push(chapter.id);
-	});
+	const tocList = _.keys(navList);
 
 	const list = blessed.list({
 		keys: true,
@@ -54,19 +56,17 @@ module.exports = function onLoaded ({epub}) {
 	screen.append(list);
 
 	list.on('select', (data, idx) => {
-		epub.getChapter(data.content, function(err, text){
-			// const dom = new JSDOM(html);
-			const newContent = getContent(text);
 
-			screen.remove(list);
-			screen.append(newContent);
+		const newContent = getContent(_parserCtx.extractText(navList[data.content]));
+
+		screen.remove(list);
+		screen.append(newContent);
+		screen.render();
+
+		newContent.key('left', () => {
+			screen.remove(newContent);
+			screen.append(list);
 			screen.render();
-
-			newContent.key('left', () => {
-				screen.remove(newContent);
-				screen.append(list);
-				screen.render();
-			});
 		});
 	});
 
