@@ -32,16 +32,32 @@ const getContent = (value) => {
 	return contentBox;
 };
 
+const getTitle = rawJson => _.get(rawJson, ['ncx', 'docTitle', '0', 'text']);
+
+const getLabel = navLabelEl => _.get(navLabelEl, ['0', 'text', '0']);
+
+const getSrc = contentEl => _.get(contentEl, ['0', '$', 'src']);
+
+const traverseNavElement = function (root, nm) {
+	if (_.has(nm, ['navLabel'])) {
+		root.push({ label: getLabel(nm.navLabel), src: getSrc(nm.content)});
+	}
+	if (_.has(nm, ['navPoint'])) {
+		_.each(_.get(nm, ['navPoint']), (nm, idx) => {
+			return traverseNavElement(root, nm);
+		});
+	}
+	return root;
+}
 
 module.exports = function onLoaded ({epub, _parserCtx}) {
-	const title = _.get(epub, ['raw', 'json', 'ncx', 'docTitle', '0', 'text']);
-	const navList = _.reduce(_.get(epub, ['raw', 'json', 'ncx', 'navMap', '0', 'navPoint']), (n, tree, idx) => {
-		n[_.get(tree, ['navLabel', '0', 'text', '0'])] = _.get(tree, ['content', '0', '$', 'src']);
-		return n;
-	}, {});
-	screen.title = title;
+	const rawJson = _.get(epub, ['raw', 'json']);
+	const navRoot = _.get(rawJson, ['ncx', 'navMap', '0']);
+	const navList = traverseNavElement([], navRoot);
 
-	const tocList = _.keys(navList);
+	const tocList = _.map(navList, 'label');
+
+	screen.title = getTitle(rawJson);
 
 	const list = blessed.list({
 		keys: true,
@@ -58,7 +74,8 @@ module.exports = function onLoaded ({epub, _parserCtx}) {
 
 	list.on('select', (data, idx) => {
 
-		const newContent = getContent(h2p(_parserCtx.extractText(navList[data.content])));
+		const dataSrc = _.find(navList, el => el.label === data.content).src;
+		const newContent = getContent(h2p(_parserCtx.extractText(dataSrc)));
 
 		screen.remove(list);
 		screen.append(newContent);
