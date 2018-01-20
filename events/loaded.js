@@ -36,15 +36,15 @@ const getTitle = rawJson => _.get(rawJson, ['ncx', 'docTitle', '0', 'text']);
 
 const getLabel = navLabelEl => _.get(navLabelEl, ['0', 'text', '0']);
 
-const getSrc = contentEl => _.get(contentEl, ['0', '$', 'src']);
+const getSrc = (opts, contentEl) => _.get(opts, ['opsRoot'], '') + _.get(contentEl, ['0', '$', 'src']);
 
-const traverseNavElement = function (root, nm) {
+const traverseNavElement = function (root, nm, opts) {
 	if (_.has(nm, ['navLabel'])) {
-		root.push({ label: getLabel(nm.navLabel), src: getSrc(nm.content)});
+		root.push({ label: getLabel(nm.navLabel), src: getSrc(opts, nm.content)});
 	}
 	if (_.has(nm, ['navPoint'])) {
 		_.each(_.get(nm, ['navPoint']), (nm, idx) => {
-			return traverseNavElement(root, nm);
+			return traverseNavElement(root, nm, opts);
 		});
 	}
 	return root;
@@ -53,7 +53,8 @@ const traverseNavElement = function (root, nm) {
 module.exports = function onLoaded ({epub, _parserCtx}) {
 	const rawJson = _.get(epub, ['raw', 'json']);
 	const navRoot = _.get(rawJson, ['ncx', 'navMap', '0']);
-	const navList = traverseNavElement([], navRoot);
+	const opsRoot = _.get(epub, ['paths', 'opsRoot'], '');
+	const navList = traverseNavElement([], navRoot, {opsRoot});
 
 	const tocList = _.map(navList, 'label');
 
